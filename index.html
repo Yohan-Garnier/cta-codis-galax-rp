@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>CTA CODIS - Galax RP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2991/2991102.png">
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a202c 0%, #7f1d1d 60%, #171717 100%);
+      min-height: 100vh;
+    }
+    .toast {
+      animation: bounceIn 0.6s;
+    }
+    @keyframes bounceIn {
+      0% {transform: scale(0.8);}
+      60% {transform: scale(1.1);}
+      100% {transform: scale(1);}
+    }
+  </style>
+</head>
+<body>
+  <audio id="alertSound" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124b5e6dac.mp3" preload="auto"></audio>
+  <div id="app" class="max-w-5xl mx-auto p-4"></div>
+  <script>
+    // --- DATA INIT ---
+    function initData() {
+      if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify([
+          { username: 'Admin', password: 'AdminGalaxRP', role: 'admin', grade: 'Colonel', active: true },
+          { username: 'CTA1', password: 'cta123', role: 'operator', grade: 'Capitaine', active: true },
+          { username: 'Sapeur1', password: 'sp123', role: 'firefighter', grade: 'Sapeur 1ère Classe', active: true }
+        ]));
+      }
+      if (!localStorage.getItem('interventions')) {
+        localStorage.setItem('interventions', JSON.stringify([]));
+      }
+      if (!localStorage.getItem('vehicles')) {
+        localStorage.setItem('vehicles', JSON.stringify([
+          { id: 'FPT1', type: 'FPT', status: 'Disponible', sector: 'Centre', location: [48.858, 2.347] },
+          { id: 'VSAV1', type: 'VSAV', status: 'Disponible', sector: 'Nord', location: [48.872, 2.356] }
+        ]));
+      }
+    }
+    // --- UTILS ---
+    function showToast(msg) {
+      let toast = document.createElement('div');
+      toast.className = 'toast fixed top-8 right-6 bg-red-700 text-white px-4 py-2 rounded shadow-lg z-50';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    function playAlert() {
+      let audio = document.getElementById('alertSound');
+      if (audio) audio.play();
+    }
+    // --- AUTH ---
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users') || '[]');
+    }
+    function authenticateUser(username, password) {
+      const users = getUsers();
+      return users.find(u => u.username === username && u.password === password && u.active);
+    }
+    // --- RENDER ---
+    let currentUser = null;
+    let currentTab = 'dashboard';
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+      if (!currentUser) {
+        renderLogin(app);
+      } else {
+        renderHeader(app);
+        renderMenu(app);
+        renderTabContent(app);
+      }
+    }
+    function renderLogin(container) {
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center min-h-[80vh]">
+          <h1 class="text-3xl font-bold mb-2 text-red-600">CTA CODIS - Galax RP</h1>
+          <form id="loginForm" class="bg-gray-800 rounded shadow-lg p-6 flex flex-col gap-4 w-80">
+            <input type="text" name="username" placeholder="Identifiant" required class="p-2 rounded"/>
+            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded"/>
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded">Connexion</button>
+            <div id="loginError" class="text-red-500"></div>
+          </form>
+        </div>
+      `;
+      document.getElementById('loginForm').onsubmit = e => {
+        e.preventDefault();
+        const username = e.target.username.value;
+        const password = e.target.password.value;
+        const user = authenticateUser(username, password);
+        if (!user) {
+          document.getElementById('loginError').innerText = "Identifiant ou mot de passe incorrect.";
+          playAlert();
+        } else {
+          currentUser = user;
+          showToast(`Bienvenue ${user.username} !`);
+          render();
+        }
+      };
+    }
+    function renderHeader(container) {
+      container.insertAdjacentHTML('beforeend', `
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <span class="text-xl font-bold text-red-600"><i class="fa-solid fa-fire-extinguisher"></i> CTA CODIS Galax RP</span>
+            <span class="ml-4 text-gray-300">Connecté : ${currentUser.username} (${currentUser.grade})</span>
+          </div>
+          <button id="logoutBtn" class="bg-gray-700 text-white rounded px-3 py-1">Déconnexion</button>
+        </div>
+      `);
+      document.getElementById('logoutBtn').onclick = () => {
+        currentUser = null;
+        render();
+      };
+    }
+    function renderMenu(container) {
+      let menu = `<div class="flex gap-4 mb-6">`;
+      menu += `<button class="tab-btn ${currentTab==='dashboard'?'bg-red-600 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="dashboard">Dashboard</button>`;
+      menu += `<button class="tab-btn ${currentTab==='interventions'?'bg-red-600 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="interventions">Interventions</button>`;
+      menu += `<button class="tab-btn ${currentTab==='vehicles'?'bg-red-600 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="vehicles">Véhicules</button>`;
+      if (currentUser.role === 'admin') {
+        menu += `<button class="tab-btn ${currentTab==='admin'?'bg-yellow-600 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="admin">Administration</button>`;
+      }
+      menu += `</div>`;
+      container.insertAdjacentHTML('beforeend', menu);
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.onclick = () => {
+          currentTab = btn.dataset.tab;
+          render();
+        };
+      });
+    }
+    function renderTabContent(container) {
+      if (currentTab === 'dashboard') renderDashboard(container);
+      if (currentTab === 'interventions') renderInterventions(container);
+      if (currentTab === 'vehicles') renderVehicles(container);
+      if (currentTab === 'admin' && currentUser.role === 'admin') renderAdminPanel(container);
+    }
+    // --- DASHBOARD ---
+    function renderDashboard(container) {
+      // Interventions en cours
+      const interventions = JSON.parse(localStorage.getItem('interventions') || '[]');
+      const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+      // Stats
+      const nbIntervEnCours = interventions.filter(i => i.status !== 'Clôturé').length;
+      const dispoUnits = vehicles.filter(v => v.status === 'Disponible').length;
+      const nbAgents = getUsers().filter(u => u.active).length;
+      container.insertAdjacentHTML('beforeend', `
+        <div class="tab-content live-data bg-gray-900 rounded p-4 mb-4">
+          <div class="grid gap-6 grid-cols-1 md:grid-cols-3 mb-6">
+            <div class="bg-red-700 text-white rounded p-4">
+              <div class="font-bold text-lg"><i class="fa-solid fa-bell"></i> Interventions actives</div>
+              <div class="text-3xl font-mono mt-2">${nbIntervEnCours}</div>
+            </div>
+            <div class="bg-blue-800 text-white rounded p-4">
+              <div class="font-bold text-lg"><i class="fa-solid fa-truck-fire"></i> Unités disponibles</div>
+              <div class="text-3xl font-mono mt-2">${dispoUnits}</div>
+            </div>
+            <div class="bg-yellow-700 text-white rounded p-4">
+              <div class="font-bold text-lg"><i class="fa-solid fa-users"></i> Agents connectés</div>
+              <div class="text-3xl font-mono mt-2">${nbAgents}</div>
+            </div>
+          </div>
+          <h2 class="text-xl font-bold text-red-500 mb-2">Interventions en cours</h2>
+          <ul>
+            ${interventions.filter(i=>i.status!=='Clôturé').map(i=>`
+              <li class="mb-1">
+                <span class="font-bold">${i.type}</span> - <span>${i.location}</span> 
+                <span class="text-yellow-400">[${i.status}]</span>
+              </li>
+            `).join('') || '<li class="text-gray-400">Aucune intervention en cours.</li>'}
+          </ul>
+        </div>
+      `);
+    }
+    // --- INTERVENTIONS ---
+    function renderInterventions(container) {
+      const interventions = JSON.parse(localStorage.getItem('interventions') || '[]');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-xl font-bold text-red-500">Journal des interventions</h2>
+            ${(currentUser.role==='operator'||currentUser.role==='admin')?`
+              <button id="addIntervBtn" class="bg-red-600 text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Nouvelle intervention</button>
+            `:''}
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th>ID</th><th>Type</th><th>Lieu</th><th>Priorité</th><th>État</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${interventions.map(i=>`
+                <tr>
+                  <td>${i.id}</td>
+                  <td>${i.type}</td>
+                  <td>${i.location}</td>
+                  <td>${i.priority}</td>
+                  <td>${i.status}</td>
+                  <td>
+                    ${(currentUser.role==='operator'||currentUser.role==='admin')?`
+                      <button class="bg-red-700 text-white px-2 py-1 rounded" onclick="editIntervention('${i.id}')">Modifier</button>
+                      <button class="bg-gray-600 text-white px-2 py-1 rounded" onclick="closeIntervention('${i.id}')">Clôturer</button>
+                    `:''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `);
+      if (document.getElementById('addIntervBtn')) {
+        document.getElementById('addIntervBtn').onclick = () => showIntervModal();
+      }
+    }
+    function showIntervModal() {
+      let modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center';
+      modal.innerHTML = `
+        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+          <h2 class="text-lg font-bold text-red-600 mb-4">Nouvelle intervention</h2>
+          <form id="newIntervForm" class="flex flex-col gap-3">
+            <input type="text" name="type" placeholder="Type d'intervention" required class="p-2 rounded"/>
+            <input type="text" name="location" placeholder="Lieu" required class="p-2 rounded"/>
+            <select name="priority" class="p-2 rounded">
+              <option value="Urgent">Urgent</option>
+              <option value="Normal">Normal</option>
+              <option value="Faible">Faible</option>
+            </select>
+            <button type="submit" class="bg-red-700 text-white p-2 rounded font-bold">Créer</button>
+            <button type="button" id="closeModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeModalBtn').onclick = () => modal.remove();
+      document.getElementById('newIntervForm').onsubmit = e => {
+        e.preventDefault();
+        let interventions = JSON.parse(localStorage.getItem('interventions')||'[]');
+        const id = 'INT'+(interventions.length+1).toString().padStart(3,'0');
+        interventions.push({
+          id,
+          type: e.target.type.value,
+          location: e.target.location.value,
+          priority: e.target.priority.value,
+          status: 'En cours',
+          created: Date.now()
+        });
+        localStorage.setItem('interventions', JSON.stringify(interventions));
+        showToast('Intervention créée !');
+        playAlert();
+        modal.remove();
+        render();
+      }
+    }
+    window.editIntervention = function(id) {
+      let interventions = JSON.parse(localStorage.getItem('interventions')||'[]');
+      let interv = interventions.find(i=>i.id===id);
+      if (!interv) return;
+      let modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center';
+      modal.innerHTML = `
+        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+          <h2 class="text-lg font-bold text-red-600 mb-4">Modifier intervention ${id}</h2>
+          <form id="editIntervForm" class="flex flex-col gap-3">
+            <input type="text" name="type" value="${interv.type}" required class="p-2 rounded"/>
+            <input type="text" name="location" value="${interv.location}" required class="p-2 rounded"/>
+            <select name="priority" class="p-2 rounded">
+              <option ${interv.priority==='Urgent'?'selected':''}>Urgent</option>
+              <option ${interv.priority==='Normal'?'selected':''}>Normal</option>
+              <option ${interv.priority==='Faible'?'selected':''}>Faible</option>
+            </select>
+            <select name="status" class="p-2 rounded">
+              <option ${interv.status==='En cours'?'selected':''}>En cours</option>
+              <option ${interv.status==='Engagé'?'selected':''}>Engagé</option>
+              <option ${interv.status==='En attente'?'selected':''}>En attente</option>
+              <option ${interv.status==='Clôturé'?'selected':''}>Clôturé</option>
+            </select>
+            <button type="submit" class="bg-red-700 text-white p-2 rounded font-bold">Sauvegarder</button>
+            <button type="button" id="closeModalBtn2" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeModalBtn2').onclick = () => modal.remove();
+      document.getElementById('editIntervForm').onsubmit = e => {
+        e.preventDefault();
+        interv.type = e.target.type.value;
+        interv.location = e.target.location.value;
+        interv.priority = e.target.priority.value;
+        interv.status = e.target.status.value;
+        localStorage.setItem('interventions', JSON.stringify(interventions));
+        showToast('Intervention modifiée !');
+        modal.remove();
+        render();
+      }
+    }
+    window.closeIntervention = function(id) {
+      let interventions = JSON.parse(localStorage.getItem('interventions')||'[]');
+      let interv = interventions.find(i=>i.id===id);
+      if (interv && interv.status!=='Clôturé') {
+        interv.status = 'Clôturé';
+        localStorage.setItem('interventions', JSON.stringify(interventions));
+        showToast('Intervention clôturée !');
+        render();
+      }
+    }
+    // --- VEHICULES ---
+    function renderVehicles(container) {
+      const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-xl font-bold text-blue-400">Gestion du parc véhicules</h2>
+            ${(currentUser.role==='operator'||currentUser.role==='admin')?`
+              <button id="addVehBtn" class="bg-blue-600 text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Ajouter véhicule</button>
+            `:''}
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th>ID</th><th>Type</th><th>Statut</th><th>Secteur</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${vehicles.map(v=>`
+                <tr>
+                  <td>${v.id}</td>
+                  <td>${v.type}</td>
+                  <td>${v.status}</td>
+                  <td>${v.sector}</td>
+                  <td>
+                    ${(currentUser.role==='operator'||currentUser.role==='admin')?`
+                      <button class="bg-blue-700 text-white px-2 py-1 rounded" onclick="editVehicle('${v.id}')">Modifier</button>
+                    `:''}
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `);
+      if (document.getElementById('addVehBtn')) {
+        document.getElementById('addVehBtn').onclick = () => showVehModal();
+      }
+    }
+    function showVehModal() {
+      let modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center';
+      modal.innerHTML = `
+        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+          <h2 class="text-lg font-bold text-blue-600 mb-4">Ajouter un véhicule</h2>
+          <form id="newVehForm" class="flex flex-col gap-3">
+            <input type="text" name="id" placeholder="ID du véhicule" required class="p-2 rounded"/>
+            <select name="type" class="p-2 rounded">
+              <option>FPT</option>
+              <option>VSAV</option>
+              <option>EPA</option>
+              <option>VSR</option>
+              <option>CDG</option>
+            </select>
+            <select name="status" class="p-2 rounded">
+              <option>Disponible</option>
+              <option>Sur intervention</option>
+              <option>En maintenance</option>
+            </select>
+            <input type="text" name="sector" placeholder="Secteur" required class="p-2 rounded"/>
+            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Ajouter</button>
+            <button type="button" id="closeVehModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeVehModalBtn').onclick = () => modal.remove();
+      document.getElementById('newVehForm').onsubmit = e => {
+        e.preventDefault();
+        let vehicles = JSON.parse(localStorage.getItem('vehicles')||'[]');
+        vehicles.push({
+          id: e.target.id.value,
+          type: e.target.type.value,
+          status: e.target.status.value,
+          sector: e.target.sector.value,
+          location: [0,0]
+        });
+        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+        showToast('Véhicule ajouté !');
+        modal.remove();
+        render();
+      }
+    }
+    window.editVehicle = function(id) {
+      let vehicles = JSON.parse(localStorage.getItem('vehicles')||'[]');
+      let veh = vehicles.find(v=>v.id===id);
+      if (!veh) return;
+      let modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center';
+      modal.innerHTML = `
+        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+          <h2 class="text-lg font-bold text-blue-600 mb-4">Modifier véhicule ${id}</h2>
+          <form id="editVehForm" class="flex flex-col gap-3">
+            <input type="text" name="id" value="${veh.id}" required class="p-2 rounded"/>
+            <select name="type" class="p-2 rounded">
+              <option ${veh.type==='FPT'?'selected':''}>FPT</option>
+              <option ${veh.type==='VSAV'?'selected':''}>VSAV</option>
+              <option ${veh.type==='EPA'?'selected':''}>EPA</option>
+              <option ${veh.type==='VSR'?'selected':''}>VSR</option>
+              <option ${veh.type==='CDG'?'selected':''}>CDG</option>
+            </select>
+            <select name="status" class="p-2 rounded">
+              <option ${veh.status==='Disponible'?'selected':''}>Disponible</option>
+              <option ${veh.status==='Sur intervention'?'selected':''}>Sur intervention</option>
+              <option ${veh.status==='En maintenance'?'selected':''}>En maintenance</option>
+            </select>
+            <input type="text" name="sector" value="${veh.sector}" required class="p-2 rounded"/>
+            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Sauvegarder</button>
+            <button type="button" id="closeVehModalBtn2" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeVehModalBtn2').onclick = () => modal.remove();
+      document.getElementById('editVehForm').onsubmit = e => {
+        e.preventDefault();
+        veh.id = e.target.id.value;
+        veh.type = e.target.type.value;
+        veh.status = e.target.status.value;
+        veh.sector = e.target.sector.value;
+        localStorage.setItem('vehicles', JSON.stringify(vehicles));
+        showToast('Véhicule modifié !');
+        modal.remove();
+        render();
+      }
+    }
+    // --- ADMINISTRATION ---
+    function renderAdminPanel(container) {
+      const users = getUsers();
+      container.insertAdjacentHTML('beforeend', `
+        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+          <h2 class="text-xl font-bold text-yellow-400 mb-2"><i class="fa-solid fa-user-shield"></i> Administration</h2>
+          <h3 class="text-lg font-semibold mb-2">Gestion des utilisateurs</h3>
+          <table class="w-full text-sm mb-4">
+            <thead>
+              <tr class="border-b border-gray-700">
+                <th>Nom</th><th>Grade</th><th>Rôle</th><th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${users.map(u=>`
+                <tr>
+                  <td>${u.username}</td>
+                  <td>${u.grade}</td>
+                  <td>${u.role}</td>
+                  <td>${u.active ? 'Actif' : 'Inactif'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <button id="addUserBtn" class="bg-yellow-600 text-white px-3 py-1 rounded"><i class="fa-solid fa-user-plus"></i> Ajouter utilisateur</button>
+        </div>
+      `);
+      document.getElementById('addUserBtn').onclick = () => showUserModal();
+    }
+    function showUserModal() {
+      let modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center';
+      modal.innerHTML = `
+        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+          <h2 class="text-lg font-bold text-yellow-600 mb-4">Ajouter un utilisateur</h2>
+          <form id="newUserForm" class="flex flex-col gap-3">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required class="p-2 rounded"/>
+            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded"/>
+            <select name="role" class="p-2 rounded">
+              <option value="firefighter">Sapeur Pompier</option>
+              <option value="operator">Opérateur CTA</option>
+              <option value="admin">Administrateur</option>
+            </select>
+            <select name="grade" class="p-2 rounded">
+              <option>Sapeur 2ème Classe</option>
+              <option>Sapeur 1ère Classe</option>
+              <option>Caporal</option>
+              <option>Caporal-Chef</option>
+              <option>Sergent</option>
+              <option>Sergent-Chef</option>
+              <option>Adjudant</option>
+              <option>Adjudant-Chef</option>
+              <option>Lieutenant</option>
+              <option>Capitaine</option>
+              <option>Commandant</option>
+              <option>Lieutenant-Colonel</option>
+              <option>Colonel</option>
+            </select>
+            <button type="submit" class="bg-yellow-600 text-white p-2 rounded font-bold">Créer</button>
+            <button type="button" id="closeUserModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById('closeUserModalBtn').onclick = () => modal.remove();
+      document.getElementById('newUserForm').onsubmit = e => {
+        e.preventDefault();
+        let users = getUsers();
+        users.push({
+          username: e.target.username.value,
+          password: e.target.password.value,
+          role: e.target.role.value,
+          grade: e.target.grade.value,
+          active: true
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+        showToast('Utilisateur ajouté !');
+        modal.remove();
+        render();
+      }
+    }
+    // --- SHORTCUTS ---
+    document.addEventListener('keydown', e => {
+      if (!currentUser) return;
+      if (e.ctrlKey && e.key === '1') {currentTab='dashboard';render();}
+      if (e.ctrlKey && e.key === '2') {currentTab='interventions';render();}
+      if (e.ctrlKey && e.key === '3') {currentTab='vehicles';render();}
+      if (e.ctrlKey && e.key.toLowerCase() === 'a' && currentUser.role==='admin') {currentTab='admin';render();}
+      if (e.key === 'Escape') render();
+    });
+    // --- AUTO REFRESH ---
+    setInterval(() => {
+      if (currentUser) render();
+    }, 30000);
+    // --- INIT ---
+    initData();
+    render();
+  </script>
+</body>
+</html>
