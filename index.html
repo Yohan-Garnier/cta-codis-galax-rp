@@ -8,16 +8,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <link rel="icon" type="image/png" href="https://www.pompiercenter.com/images/sdis/logos/59logo_59.jpg">
+  <link rel="icon" href="data:,"/>
   <style>
     body {
-      background: radial-gradient(circle at 60% 10%, #22306b 0%, #182647 60%, #131a30 100%);
+      background: #fff;
+      color: #111;
       min-height: 100vh;
     }
     .toast { animation: bounceIn 0.6s; }
     @keyframes bounceIn { 0% {transform: scale(0.8);} 60% {transform: scale(1.1);} 100% {transform: scale(1);} }
-    .modal-bg { background: rgba(0,0,0,0.6); }
-    .logo-img { width: 100px; height: auto; }
+    .modal-bg { background: rgba(0,0,0,0.25); }
+    input, select, textarea {
+      color: #111 !important;
+    }
   </style>
 </head>
 <body>
@@ -49,7 +52,7 @@
     // --- UTILS ---
     function showToast(msg) {
       let toast = document.createElement('div');
-      toast.className = 'toast fixed top-8 right-6 bg-blue-700 text-white px-4 py-2 rounded shadow-lg z-50';
+      toast.className = 'toast fixed top-8 right-6 bg-black text-white px-4 py-2 rounded shadow-lg z-50';
       toast.innerText = msg;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
@@ -86,12 +89,11 @@
     function renderLogin(container) {
       container.innerHTML = `
         <div class="flex flex-col items-center justify-center min-h-[80vh]">
-          <img src="logo.png" alt="Logo CSP" class="logo-img mb-4 shadow-lg bg-white rounded p-2"/>
-          <h1 class="text-3xl font-bold mb-2 text-blue-600">CTA CODIS - Galax RP</h1>
-          <form id="loginForm" class="bg-gray-800 rounded shadow-lg p-6 flex flex-col gap-4 w-80">
-            <input type="text" name="username" placeholder="Identifiant" required class="p-2 rounded"/>
-            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded"/>
-            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold p-2 rounded">Connexion</button>
+          <h1 class="text-3xl font-bold mb-2 text-black">CTA CODIS - Galax RP</h1>
+          <form id="loginForm" class="bg-gray-200 rounded shadow-lg p-6 flex flex-col gap-4 w-80">
+            <input type="text" name="username" placeholder="Identifiant" required class="p-2 rounded border"/>
+            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded border"/>
+            <button type="submit" class="bg-black hover:bg-gray-700 text-white font-bold p-2 rounded">Connexion</button>
             <div id="loginError" class="text-red-500"></div>
           </form>
         </div>
@@ -115,9 +117,8 @@
       container.insertAdjacentHTML('beforeend', `
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Logo CSP" class="logo-img bg-white rounded shadow-sm"/>
-            <span class="text-xl font-bold text-blue-700">CTA CODIS Galax RP</span>
-            <span class="ml-4 text-gray-300">Connecté : ${currentUser.username} (${currentUser.grade})</span>
+            <span class="text-xl font-bold text-black">CTA CODIS Galax RP</span>
+            <span class="ml-4 text-gray-700">Connecté : ${currentUser.username} (${currentUser.grade})</span>
           </div>
           <button id="logoutBtn" class="bg-gray-700 text-white rounded px-3 py-1">Déconnexion</button>
         </div>
@@ -129,12 +130,12 @@
     }
     function renderMenu(container) {
       let menu = `<div class="flex gap-4 mb-6 flex-wrap">`;
-      menu += `<button class="tab-btn ${currentTab==='dashboard'?'bg-blue-700 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="dashboard">Dashboard</button>`;
-      menu += `<button class="tab-btn ${currentTab==='interventions'?'bg-blue-700 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="interventions">Interventions</button>`;
-      menu += `<button class="tab-btn ${currentTab==='vehicles'?'bg-blue-700 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="vehicles">Véhicules</button>`;
-      menu += `<button class="tab-btn ${currentTab==='calls'?'bg-blue-700 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="calls"><i class="fa-solid fa-headset"></i> Appels</button>`;
+      menu += `<button class="tab-btn ${currentTab==='dashboard'?'bg-black text-white':'bg-gray-200 text-black'} px-4 py-2 rounded" data-tab="dashboard">Dashboard</button>`;
+      menu += `<button class="tab-btn ${currentTab==='interventions'?'bg-black text-white':'bg-gray-200 text-black'} px-4 py-2 rounded" data-tab="interventions">Interventions</button>`;
+      menu += `<button class="tab-btn ${currentTab==='vehicles'?'bg-black text-white':'bg-gray-200 text-black'} px-4 py-2 rounded" data-tab="vehicles">Véhicules</button>`;
+      menu += `<button class="tab-btn ${currentTab==='calls'?'bg-black text-white':'bg-gray-200 text-black'} px-4 py-2 rounded" data-tab="calls"><i class="fa-solid fa-headset"></i> Appels</button>`;
       if (currentUser.role === 'admin') {
-        menu += `<button class="tab-btn ${currentTab==='admin'?'bg-yellow-600 text-white':'bg-gray-800 text-gray-300'} px-4 py-2 rounded" data-tab="admin">Administration</button>`;
+        menu += `<button class="tab-btn ${currentTab==='admin'?'bg-yellow-600 text-white':'bg-gray-200 text-black'} px-4 py-2 rounded" data-tab="admin">Administration</button>`;
       }
       menu += `</div>`;
       container.insertAdjacentHTML('beforeend', menu);
@@ -154,35 +155,34 @@
     }
     // --- DASHBOARD ---
     function renderDashboard(container) {
-      // Interventions en cours
       const interventions = JSON.parse(localStorage.getItem('interventions') || '[]');
       const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
       const nbIntervEnCours = interventions.filter(i => i.status !== 'Clôturé').length;
       const dispoUnits = vehicles.filter(v => v.status === 'Disponible').length;
       const nbAgents = getUsers().filter(u => u.active).length;
       container.insertAdjacentHTML('beforeend', `
-        <div class="tab-content live-data bg-gray-900 rounded p-4 mb-4">
+        <div class="tab-content live-data bg-gray-100 rounded p-4 mb-4 border border-gray-300">
           <div class="grid gap-6 grid-cols-1 md:grid-cols-3 mb-6">
-            <div class="bg-blue-700 text-white rounded p-4 shadow">
+            <div class="bg-black text-white rounded p-4 shadow">
               <div class="font-bold text-lg"><i class="fa-solid fa-bell"></i> Interventions actives</div>
               <div class="text-3xl font-mono mt-2">${nbIntervEnCours}</div>
             </div>
-            <div class="bg-blue-800 text-white rounded p-4 shadow">
+            <div class="bg-gray-800 text-white rounded p-4 shadow">
               <div class="font-bold text-lg"><i class="fa-solid fa-truck-fire"></i> Unités disponibles</div>
               <div class="text-3xl font-mono mt-2">${dispoUnits}</div>
             </div>
-            <div class="bg-yellow-700 text-white rounded p-4 shadow">
+            <div class="bg-yellow-600 text-white rounded p-4 shadow">
               <div class="font-bold text-lg"><i class="fa-solid fa-users"></i> Agents connectés</div>
               <div class="text-3xl font-mono mt-2">${nbAgents}</div>
             </div>
           </div>
-          <h2 class="text-xl font-bold text-blue-400 mb-2">Interventions en cours</h2>
+          <h2 class="text-xl font-bold text-black mb-2">Interventions en cours</h2>
           <ul>
             ${interventions.filter(i=>i.status!=='Clôturé').map(i=>`
               <li class="mb-1">
                 <span class="font-bold">${i.type}</span> - <span>${i.location}</span>
-                <span class="text-yellow-400">[${i.status}]</span>
-                ${i.vehicles && i.vehicles.length ? `<span class="ml-2 text-blue-300 text-xs">(${i.vehicles.join(', ')})</span>` : ''}
+                <span class="text-yellow-600">[${i.status}]</span>
+                ${i.vehicles && i.vehicles.length ? `<span class="ml-2 text-black text-xs">(${i.vehicles.join(', ')})</span>` : ''}
               </li>
             `).join('') || '<li class="text-gray-400">Aucune intervention en cours.</li>'}
           </ul>
@@ -194,21 +194,21 @@
       const interventions = JSON.parse(localStorage.getItem('interventions') || '[]');
       const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
       container.insertAdjacentHTML('beforeend', `
-        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+        <div class="tab-content bg-gray-100 rounded p-4 mb-4 border border-gray-300">
           <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
-            <h2 class="text-xl font-bold text-blue-400">Journal des interventions</h2>
+            <h2 class="text-xl font-bold text-black">Journal des interventions</h2>
             ${(currentUser.role==='operator'||currentUser.role==='admin')?`
-              <button id="addIntervBtn" class="bg-blue-700 text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Nouvelle intervention</button>
+              <button id="addIntervBtn" class="bg-black text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Nouvelle intervention</button>
             `:''}
           </div>
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b border-gray-700">
+              <tr class="border-b border-gray-300">
                 <th>ID</th><th>Type</th><th>Lieu</th><th>Priorité</th><th>État</th><th>Véhicules</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              ${interventions.map(i=>`
+              ${interventions.map((i, idx)=>`
                 <tr>
                   <td>${i.id}</td>
                   <td>${i.type}</td>
@@ -217,15 +217,16 @@
                   <td>${i.status}</td>
                   <td>
                     ${i.vehicles && i.vehicles.length
-                      ? i.vehicles.map(v=>`<span class="bg-blue-800 text-white px-2 py-1 rounded text-xs mr-1">${v}</span>`).join('')
+                      ? i.vehicles.map(v=>`<span class="bg-gray-800 text-white px-2 py-1 rounded text-xs mr-1">${v}</span>`).join('')
                       : '<span class="text-gray-400 text-xs">Aucun</span>'
                     }
                   </td>
                   <td>
                     ${(currentUser.role==='operator'||currentUser.role==='admin')?`
-                      <button class="bg-blue-700 text-white px-2 py-1 rounded" onclick="editIntervention('${i.id}')">Modifier</button>
-                      <button class="bg-gray-600 text-white px-2 py-1 rounded" onclick="closeIntervention('${i.id}')">Clôturer</button>
-                      <button class="bg-yellow-700 text-white px-2 py-1 rounded" onclick="affectVehicle('${i.id}')"><i class="fa-solid fa-truck-fire"></i> Affecter véhicule</button>
+                      <button class="bg-black text-white px-2 py-1 rounded" onclick="editIntervention('${i.id}')">Modifier</button>
+                      <button class="bg-gray-700 text-white px-2 py-1 rounded" onclick="closeIntervention('${i.id}')">Clôturer</button>
+                      <button class="bg-yellow-600 text-black px-2 py-1 rounded" onclick="affectVehicle('${i.id}')"><i class="fa-solid fa-truck-fire"></i> Affecter véhicule</button>
+                      ${currentUser.role==='admin'?`<button class="bg-red-700 text-white px-2 py-1 rounded" onclick="deleteIntervention(${idx})">Supprimer</button>`:''}
                     `:''}
                   </td>
                 </tr>
@@ -242,17 +243,17 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
-          <h2 class="text-lg font-bold text-blue-700 mb-4">Nouvelle intervention</h2>
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
+          <h2 class="text-lg font-bold text-black mb-4">Nouvelle intervention</h2>
           <form id="newIntervForm" class="flex flex-col gap-3">
-            <input type="text" name="type" placeholder="Type d'intervention" required class="p-2 rounded"/>
-            <input type="text" name="location" placeholder="Lieu" required class="p-2 rounded"/>
-            <select name="priority" class="p-2 rounded">
+            <input type="text" name="type" placeholder="Type d'intervention" required class="p-2 rounded border"/>
+            <input type="text" name="location" placeholder="Lieu" required class="p-2 rounded border"/>
+            <select name="priority" class="p-2 rounded border">
               <option value="Urgent">Urgent</option>
               <option value="Normal">Normal</option>
               <option value="Faible">Faible</option>
             </select>
-            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Créer</button>
+            <button type="submit" class="bg-black text-white p-2 rounded font-bold">Créer</button>
             <button type="button" id="closeModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -286,23 +287,23 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
-          <h2 class="text-lg font-bold text-blue-700 mb-4">Modifier intervention ${id}</h2>
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
+          <h2 class="text-lg font-bold text-black mb-4">Modifier intervention ${id}</h2>
           <form id="editIntervForm" class="flex flex-col gap-3">
-            <input type="text" name="type" value="${interv.type}" required class="p-2 rounded"/>
-            <input type="text" name="location" value="${interv.location}" required class="p-2 rounded"/>
-            <select name="priority" class="p-2 rounded">
+            <input type="text" name="type" value="${interv.type}" required class="p-2 rounded border"/>
+            <input type="text" name="location" value="${interv.location}" required class="p-2 rounded border"/>
+            <select name="priority" class="p-2 rounded border">
               <option ${interv.priority==='Urgent'?'selected':''}>Urgent</option>
               <option ${interv.priority==='Normal'?'selected':''}>Normal</option>
               <option ${interv.priority==='Faible'?'selected':''}>Faible</option>
             </select>
-            <select name="status" class="p-2 rounded">
+            <select name="status" class="p-2 rounded border">
               <option ${interv.status==='En cours'?'selected':''}>En cours</option>
               <option ${interv.status==='Engagé'?'selected':''}>Engagé</option>
               <option ${interv.status==='En attente'?'selected':''}>En attente</option>
               <option ${interv.status==='Clôturé'?'selected':''}>Clôturé</option>
             </select>
-            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Sauvegarder</button>
+            <button type="submit" class="bg-black text-white p-2 rounded font-bold">Sauvegarder</button>
             <button type="button" id="closeModalBtn2" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -336,21 +337,19 @@
       let vehicles = JSON.parse(localStorage.getItem('vehicles')||'[]');
       let intervention = interventions.find(i=>i.id===intId);
       if (!intervention) return;
-
-      // Liste véhicules non affectés ou dispos
       let availableVehicles = vehicles.filter(v => !v.affectation && v.status === 'Disponible');
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
           <h2 class="text-lg font-bold text-yellow-600 mb-4">Affecter un véhicule à ${intId}</h2>
           <form id="affectVehForm" class="flex flex-col gap-3">
-            <select name="vehicleId" class="p-2 rounded" required>
+            <select name="vehicleId" class="p-2 rounded border" required>
               ${availableVehicles.length ? availableVehicles.map(v =>
                 `<option value="${v.id}">${v.id} [${v.type}] - ${v.sector}</option>`
               ).join('') : '<option disabled>Aucun véhicule disponible</option>'}
             </select>
-            <button type="submit" class="bg-yellow-700 text-white p-2 rounded font-bold">Affecter</button>
+            <button type="submit" class="bg-yellow-600 text-black p-2 rounded font-bold">Affecter</button>
             <button type="button" id="closeAffectModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -362,8 +361,6 @@
         let vehId = e.target.vehicleId.value;
         intervention.vehicles = intervention.vehicles || [];
         intervention.vehicles.push(vehId);
-
-        // Met à jour l'affectation côté véhicule
         let vehicle = vehicles.find(v=>v.id===vehId);
         if (vehicle) vehicle.affectation = intervention.id;
         localStorage.setItem('interventions', JSON.stringify(interventions));
@@ -373,20 +370,27 @@
         render();
       }
     }
+    window.deleteIntervention = function(idx) {
+      let interventions = JSON.parse(localStorage.getItem('interventions')||'[]');
+      interventions.splice(idx,1);
+      localStorage.setItem('interventions', JSON.stringify(interventions));
+      showToast('Intervention supprimée !');
+      render();
+    }
     // --- VEHICULES ---
     function renderVehicles(container) {
       const vehicles = JSON.parse(localStorage.getItem('vehicles') || '[]');
       container.insertAdjacentHTML('beforeend', `
-        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+        <div class="tab-content bg-gray-100 rounded p-4 mb-4 border border-gray-300">
           <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
-            <h2 class="text-xl font-bold text-blue-400">Gestion du parc véhicules</h2>
+            <h2 class="text-xl font-bold text-black">Gestion du parc véhicules</h2>
             ${(currentUser.role==='operator'||currentUser.role==='admin')?`
-              <button id="addVehBtn" class="bg-blue-700 text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Ajouter véhicule</button>
+              <button id="addVehBtn" class="bg-black text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Ajouter véhicule</button>
             `:''}
           </div>
           <table class="w-full text-sm">
             <thead>
-              <tr class="border-b border-gray-700">
+              <tr class="border-b border-gray-300">
                 <th>ID</th><th>Type</th><th>Statut</th><th>Secteur</th><th>Affectation</th><th>Actions</th>
               </tr>
             </thead>
@@ -397,10 +401,10 @@
                   <td>${v.type}</td>
                   <td>${v.status}</td>
                   <td>${v.sector}</td>
-                  <td>${v.affectation ? `<span class="bg-yellow-700 text-white px-2 py-1 rounded text-xs">${v.affectation}</span>` : '<span class="text-gray-400 text-xs">Aucune</span>'}</td>
+                  <td>${v.affectation ? `<span class="bg-yellow-600 text-black px-2 py-1 rounded text-xs">${v.affectation}</span>` : '<span class="text-gray-400 text-xs">Aucune</span>'}</td>
                   <td>
                     ${(currentUser.role==='operator'||currentUser.role==='admin')?`
-                      <button class="bg-blue-800 text-white px-2 py-1 rounded" onclick="editVehicle('${v.id}')">Modifier</button>
+                      <button class="bg-gray-800 text-white px-2 py-1 rounded" onclick="editVehicle('${v.id}')">Modifier</button>
                       <button class="bg-gray-700 text-white px-2 py-1 rounded" onclick="removeVehicle('${v.id}')">Supprimer</button>
                     `:''}
                   </td>
@@ -418,24 +422,24 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
-          <h2 class="text-lg font-bold text-blue-600 mb-4">Ajouter un véhicule</h2>
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
+          <h2 class="text-lg font-bold text-black mb-4">Ajouter un véhicule</h2>
           <form id="newVehForm" class="flex flex-col gap-3">
-            <input type="text" name="id" placeholder="ID du véhicule" required class="p-2 rounded"/>
-            <select name="type" class="p-2 rounded">
+            <input type="text" name="id" placeholder="ID du véhicule" required class="p-2 rounded border"/>
+            <select name="type" class="p-2 rounded border">
               <option>FPT</option>
               <option>VSAV</option>
               <option>EPA</option>
               <option>VSR</option>
               <option>CDG</option>
             </select>
-            <select name="status" class="p-2 rounded">
+            <select name="status" class="p-2 rounded border">
               <option>Disponible</option>
               <option>Sur intervention</option>
               <option>En maintenance</option>
             </select>
-            <input type="text" name="sector" placeholder="Secteur" required class="p-2 rounded"/>
-            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Ajouter</button>
+            <input type="text" name="sector" placeholder="Secteur" required class="p-2 rounded border"/>
+            <button type="submit" class="bg-black text-white p-2 rounded font-bold">Ajouter</button>
             <button type="button" id="closeVehModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -466,24 +470,24 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
-          <h2 class="text-lg font-bold text-blue-600 mb-4">Modifier véhicule ${id}</h2>
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
+          <h2 class="text-lg font-bold text-black mb-4">Modifier véhicule ${id}</h2>
           <form id="editVehForm" class="flex flex-col gap-3">
-            <input type="text" name="id" value="${veh.id}" required class="p-2 rounded"/>
-            <select name="type" class="p-2 rounded">
+            <input type="text" name="id" value="${veh.id}" required class="p-2 rounded border"/>
+            <select name="type" class="p-2 rounded border">
               <option ${veh.type==='FPT'?'selected':''}>FPT</option>
               <option ${veh.type==='VSAV'?'selected':''}>VSAV</option>
               <option ${veh.type==='EPA'?'selected':''}>EPA</option>
               <option ${veh.type==='VSR'?'selected':''}>VSR</option>
               <option ${veh.type==='CDG'?'selected':''}>CDG</option>
             </select>
-            <select name="status" class="p-2 rounded">
+            <select name="status" class="p-2 rounded border">
               <option ${veh.status==='Disponible'?'selected':''}>Disponible</option>
               <option ${veh.status==='Sur intervention'?'selected':''}>Sur intervention</option>
               <option ${veh.status==='En maintenance'?'selected':''}>En maintenance</option>
             </select>
-            <input type="text" name="sector" value="${veh.sector}" required class="p-2 rounded"/>
-            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Sauvegarder</button>
+            <input type="text" name="sector" value="${veh.sector}" required class="p-2 rounded border"/>
+            <button type="submit" class="bg-black text-white p-2 rounded font-bold">Sauvegarder</button>
             <button type="button" id="closeVehModalBtn2" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -513,12 +517,12 @@
     function renderAdminPanel(container) {
       const users = getUsers();
       container.insertAdjacentHTML('beforeend', `
-        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
-          <h2 class="text-xl font-bold text-yellow-400 mb-2"><i class="fa-solid fa-user-shield"></i> Administration</h2>
+        <div class="tab-content bg-gray-100 rounded p-4 mb-4 border border-gray-300">
+          <h2 class="text-xl font-bold text-yellow-600 mb-2"><i class="fa-solid fa-user-shield"></i> Administration</h2>
           <h3 class="text-lg font-semibold mb-2">Gestion des utilisateurs</h3>
           <table class="w-full text-sm mb-4">
             <thead>
-              <tr class="border-b border-gray-700">
+              <tr class="border-b border-gray-300">
                 <th>Nom</th><th>Grade</th><th>Rôle</th><th>Statut</th><th>Actions</th>
               </tr>
             </thead>
@@ -536,7 +540,7 @@
               `).join('')}
             </tbody>
           </table>
-          <button id="addUserBtn" class="bg-yellow-600 text-white px-3 py-1 rounded"><i class="fa-solid fa-user-plus"></i> Ajouter utilisateur</button>
+          <button id="addUserBtn" class="bg-yellow-600 text-black px-3 py-1 rounded"><i class="fa-solid fa-user-plus"></i> Ajouter utilisateur</button>
         </div>
       `);
       document.getElementById('addUserBtn').onclick = () => showUserModal();
@@ -553,17 +557,17 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
           <h2 class="text-lg font-bold text-yellow-600 mb-4">Ajouter un utilisateur</h2>
           <form id="newUserForm" class="flex flex-col gap-3">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required class="p-2 rounded"/>
-            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded"/>
-            <select name="role" class="p-2 rounded">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required class="p-2 rounded border"/>
+            <input type="password" name="password" placeholder="Mot de passe" required class="p-2 rounded border"/>
+            <select name="role" class="p-2 rounded border">
               <option value="firefighter">Sapeur Pompier</option>
               <option value="operator">Opérateur CTA</option>
               <option value="admin">Administrateur</option>
             </select>
-            <select name="grade" class="p-2 rounded">
+            <select name="grade" class="p-2 rounded border">
               <option>Sapeur 2ème Classe</option>
               <option>Sapeur 1ère Classe</option>
               <option>Caporal</option>
@@ -578,7 +582,7 @@
               <option>Lieutenant-Colonel</option>
               <option>Colonel</option>
             </select>
-            <button type="submit" class="bg-yellow-600 text-white p-2 rounded font-bold">Créer</button>
+            <button type="submit" class="bg-yellow-600 text-black p-2 rounded font-bold">Créer</button>
             <button type="button" id="closeUserModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -605,18 +609,21 @@
     function renderCalls(container) {
       const calls = JSON.parse(localStorage.getItem('calls')||'[]');
       container.insertAdjacentHTML('beforeend', `
-        <div class="tab-content bg-gray-900 rounded p-4 mb-4">
+        <div class="tab-content bg-gray-100 rounded p-4 mb-4 border border-gray-300">
           <div class="flex justify-between items-center mb-2 flex-wrap gap-2">
-            <h2 class="text-xl font-bold text-blue-400"><i class="fa-solid fa-headset"></i> Appels radio / interventions</h2>
-            <button id="addCallBtn" class="bg-blue-700 text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Nouvel appel</button>
+            <h2 class="text-xl font-bold text-black"><i class="fa-solid fa-headset"></i> Appels radio / interventions</h2>
+            <button id="addCallBtn" class="bg-black text-white px-3 py-1 rounded"><i class="fa-solid fa-plus"></i> Nouvel appel</button>
           </div>
           <ul>
-            ${calls.length ? calls.slice().reverse().map(call=>`
-              <li class="mb-2 border-b border-gray-700 pb-2">
-                <span class="font-bold text-blue-500">${call.code ? call.code + ' - ' : ''}</span>
-                <span>${call.message}</span>
-                <span class="ml-2 text-gray-400 text-xs">[${call.user}]</span>
-                <span class="ml-2 text-xs text-gray-500">${new Date(call.time).toLocaleString()}</span>
+            ${calls.length ? calls.slice().reverse().map((call, idx)=>`
+              <li class="mb-2 border-b border-gray-200 pb-2 flex justify-between">
+                <div>
+                  <span class="font-bold text-black">${call.code ? call.code + ' - ' : ''}</span>
+                  <span>${call.message}</span>
+                  <span class="ml-2 text-gray-500 text-xs">[${call.user}]</span>
+                  <span class="ml-2 text-xs text-gray-400">${new Date(call.time).toLocaleString()}</span>
+                </div>
+                ${currentUser.role==='admin'?`<button class="bg-red-700 text-white px-2 py-1 rounded h-7" onclick="deleteCall(${calls.length-1-idx})"><i class="fa-solid fa-trash"></i></button>`:""}
               </li>
             `).join('') : '<li class="text-gray-400">Aucun appel enregistré.</li>'}
           </ul>
@@ -628,10 +635,10 @@
       let modal = document.createElement('div');
       modal.className = 'fixed inset-0 z-50 modal-bg flex items-center justify-center';
       modal.innerHTML = `
-        <div class="bg-gray-900 rounded p-6 w-full max-w-md animate-bounceIn">
-          <h2 class="text-lg font-bold text-blue-700 mb-4">Simuler un appel radio</h2>
+        <div class="bg-gray-100 rounded p-6 w-full max-w-md animate-bounceIn border border-gray-300">
+          <h2 class="text-lg font-bold text-black mb-4">Simuler un appel radio</h2>
           <form id="callForm" class="flex flex-col gap-3">
-            <select name="code" class="p-2 rounded">
+            <select name="code" class="p-2 rounded border">
               <option value="">-- Code radio --</option>
               <option value="10-00">10-00 : Urgence / Alerte générale</option>
               <option value="10-20">10-20 : Demande de position</option>
@@ -642,8 +649,8 @@
               <option value="10-04">10-04 : Message reçu</option>
               <option value="10-18">10-18 : Urgence absolue</option>
             </select>
-            <input type="text" name="message" placeholder="Message radio" required maxlength="120" class="p-2 rounded"/>
-            <button type="submit" class="bg-blue-700 text-white p-2 rounded font-bold">Envoyer appel</button>
+            <input type="text" name="message" placeholder="Message radio" required maxlength="120" class="p-2 rounded border"/>
+            <button type="submit" class="bg-black text-white p-2 rounded font-bold">Envoyer appel</button>
             <button type="button" id="closeCallModalBtn" class="bg-gray-700 text-white p-2 rounded">Annuler</button>
           </form>
         </div>
@@ -665,6 +672,13 @@
         modal.remove();
         render();
       }
+    }
+    window.deleteCall = function(idx) {
+      let calls = JSON.parse(localStorage.getItem('calls')||'[]');
+      calls.splice(idx,1);
+      localStorage.setItem('calls', JSON.stringify(calls));
+      showToast('Appel supprimé !');
+      render();
     }
     // --- SHORTCUTS ---
     document.addEventListener('keydown', e => {
